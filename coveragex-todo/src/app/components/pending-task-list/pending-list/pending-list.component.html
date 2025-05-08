@@ -1,0 +1,15 @@
+<div class="task-list">
+  <div class="task-card" *ngFor="let task of todos$ | async">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ task.title }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ task.description }}</p>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-button color="primary" (click)="markAsDone(task.id)">Done</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>
