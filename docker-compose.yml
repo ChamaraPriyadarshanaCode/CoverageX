@@ -4,8 +4,6 @@ services:
     container_name: task-db
     environment:
       MYSQL_DATABASE: task
-      # MYSQL_USER: root
-      MYSQL_PASSWORD: root
       MYSQL_ROOT_PASSWORD: root
     ports:
       - "3307:3306"
@@ -13,15 +11,22 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - task-network
-    command: --default-authentication-plugin=mysql_native_password
-
+    command: >
+      --character-set-server=utf8mb4 
+      --collation-server=utf8mb4_unicode_ci
+      --skip-log-bin
+    healthcheck:
+      test: ["CMD", "root", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   backend:
     build: 
       context: ./CoveragexTaskBE
       dockerfile: Dockerfile
     container_name: task-backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/task?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3307/task?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
