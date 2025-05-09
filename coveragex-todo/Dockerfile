@@ -1,5 +1,5 @@
 # Stage 1: Build the Angular application
-FROM node:20-bullseye AS build
+FROM node:18 AS build
 
 WORKDIR /app
 
@@ -7,16 +7,16 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install app dependencies
-RUN npm ci
+RUN ["npm", "ci"]
 
 # Install Angular CLI globally
-RUN npm install -g @angular/cli
+RUN ["npm", "install", "-g", "@angular/cli"]
 
 # Copy source code
 COPY . .
 
 # Build the Angular app
-RUN npm run build
+RUN ["npm", "run", "build"]
 
 # Stage 2: Serve the application with Nginx
 FROM nginx:1.17.1-alpine
@@ -29,5 +29,5 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
-# Use envsubst to inject runtime config and start Nginx
-CMD ["/bin/sh", "-c", "envsubst < /usr/share/nginx/html/assets/config.template.json > /usr/share/nginx/html/assets/config.json && exec nginx -g 'daemon off;'"]
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
