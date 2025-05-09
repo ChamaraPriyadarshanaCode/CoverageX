@@ -1,106 +1,59 @@
-# README for Task Management Application
+# README for Dockerized Full-Stack Application
 
 ## Project Overview
-This is a full-stack task management application with:
-- Angular frontend (run with `ng serve`)
-- Spring Boot backend (running on port 8089)
-- MySQL 8.0 database (using a database named "task")
+This project consists of a full-stack application with:
+- Frontend application
+- Spring Boot backend application
+- MySQL database
+
+All components are orchestrated using Docker Compose for easy setup and deployment.
 
 ## Prerequisites
 Before you begin, ensure you have the following installed:
-- Node.js (v14 or higher)
-- Angular CLI (`npm install -g @angular/cli`)
-- Java JDK (version 11 or higher)
-- MySQL Server (version 8.0)
-- Maven (for Spring Boot)
+- Docker (version 20.10.0 or higher)
+- Docker Compose (version 1.29.0 or higher)
+- Git (optional, for cloning the repository)
 
-## Setup Instructions
+## Getting Started
 
-### 1. Database Setup (MySQL 8.0)
-1. Start your MySQL 8.0 server
-2. Create a database named `task`:
-   ```sql
-   CREATE DATABASE task;
-   ```
-3. Update the Spring Boot application properties with your MySQL 8.0 credentials:
-   - File: `src/main/resources/application.properties`
-   - Example configuration:
-     ```
-     spring.datasource.url=jdbc:mysql://localhost:3306/task?useSSL=false&serverTimezone=UTC
-     spring.datasource.username=your_username
-     spring.datasource.password=your_password
-     spring.jpa.hibernate.ddl-auto=update
-     ```
-   - Note the additional parameters for MySQL 8.0 compatibility
+### 1. Clone the Repository (if applicable)
+```bash
+git clone https://github.com/ChamaraPriyadarshanaCode/CoverageX.git
+cd CoverageX
+git checkout master
+```
 
-### 2. Backend Setup
-1. Navigate to the Spring Boot project directory
-2. Build the project:
-   ```bash
-   mvn clean install
-   ```
-3. Run the application:
-   ```bash
-   mvn spring-boot:run
-   ```
-   - The backend will start on `http://localhost:8089`
+### 2. Build and Run with Docker Compose
+Run the following command from the project root directory:
 
-### 3. Frontend Setup
-1. Navigate to the Angular project directory
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure the API base URL in `src/environments/environment.ts`:
-   ```typescript
-   export const environment = {
-     production: false,
-     apiUrl: 'http://localhost:8089/api/tasks'
-   };
-   ```
-4. Run the development server:
-   ```bash
-   ng serve
-   ```
-   - The frontend will start on `http://localhost:4200`
+```bash
+docker-compose up --build
+```
 
-## API Endpoints
-The Spring Boot application provides the following endpoints:
+For detached mode (running in background):
+```bash
+docker-compose up --build -d
+```
 
-### Task Management
-- `POST /api/tasks` - Add a new task
-  - Request body: TaskDTO
-  - Returns: Created TaskDTO with HTTP 201 status
+### 3. Access the Applications
+- **Frontend**: http://localhost:80 (port may vary based on your configuration)
+- **Backend API**: http://localhost:8089
+- **MySQL Database**: Accessible internally at `mysql:3306` from other containers
 
-- `GET /api/tasks` - Get recent tasks
-  - Returns: List of TaskDTO objects
+## Available Services
+The Docker Compose file defines the following services:
+1. `frontend`: The frontend application
+2. `backend`: Spring Boot application
+3. `mysql`: MySQL database service
 
-- `PUT /api/tasks/{taskId}/complete` - Mark a task as completed
-  - Returns: Completed TaskDTO
+## Useful Commands
 
-## Configuration
-- Frontend API base URL is configured in `src/environments/environment.ts`
-- Backend server port is set to 8089 in `application.properties`
-- MySQL 8.0 specific JDBC URL parameters are included for proper connectivity
+### Docker Compose Commands
+- Start services in detached mode: `docker-compose up -d`
+- Stop services: `docker-compose down`
+- View running containers: `docker-compose ps`
 
-## Troubleshooting
-- **MySQL 8.0 Connection Issues**:
-  - Ensure you're using the correct JDBC URL with timezone setting
-  - Verify the MySQL 8.0 driver is in your dependencies
-  - Check that the user has proper permissions
-
-
-- **Port Conflicts**:
-  - Verify nothing else is using port 8089
-  - Change port in `application.properties` if needed:
-    ```
-    server.port=8089
-    ```
-
-## Development Notes
-- The backend uses:
-  - Spring Data JPA for database operations
-  - DTO pattern for API responses
-  - Validation annotations for request bodies
-- The frontend should use Angular services to call these endpoints
-- MySQL 8.0 requires specific connection parameters for proper timezone handling
+### Cleanup
+To stop and remove all containers, networks, and volumes:
+```bash
+docker-compose down -v
