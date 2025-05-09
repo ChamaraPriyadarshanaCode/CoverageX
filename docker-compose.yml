@@ -1,48 +1,37 @@
 services:
-  database:
+  mysql:
     image: mysql:8.0
-    container_name: task-db
+    container_name: task-mysql
     environment:
-      MYSQL_DATABASE: task
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: task
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-    networks:
-      - task-network
-    command: >
-      --character-set-server=utf8mb4 
-      --collation-server=utf8mb4_unicode_ci
-      --skip-log-bin
-      --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      interval: 5s
+      retries: 10
+
   backend:
-    build: 
+    build:
       context: ./CoveragexTaskBE
       dockerfile: Dockerfile
     container_name: task-backend
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://task-db:3306/task?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     ports:
       - "8089:8089"
-    networks:
-      - task-network
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/task?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
     depends_on:
-      database:
+      mysql:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8089/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+
   frontend:
     build:
       context: ./coveragex-todo
@@ -50,10 +39,12 @@ services:
     container_name: task-frontend
     ports:
       - "80:80"
+    environment:
+      API_URL: http://backend:8089/api/tasks
+    volumes:
+      - ./coveragex-todo/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - backend
-    networks:
-      - task-network
 
 networks:
   task-network:
@@ -61,3 +52,4 @@ networks:
 
 volumes:
   mysql_data:
+    driver: local

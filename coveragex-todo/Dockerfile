@@ -15,19 +15,19 @@ RUN ["npm", "install", "-g", "@angular/cli"]
 # Copy source code
 COPY . .
 
-# Build the Angular app
-RUN ["npm", "run", "build"]
+RUN npm run build --prod
 
-# Stage 2: Serve the application with Nginx
-FROM nginx:1.17.1-alpine
-
-# Copy built Angular app from previous stage
-COPY --from=build /app/dist/coveragex-task /usr/share/nginx/html
-
-# Copy custom nginx config
+# Run stage
+FROM nginx:alpine
+# Remove default files
+RUN rm -rf /usr/share/nginx/html/*
+# Copy built Angular files using specific outputPath
+COPY --from=build /app/dist/coveragex-task/browser /usr/share/nginx/html
+# Copy Nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
+# Fix permissions
+RUN chmod -R 755 /usr/share/nginx/html && \
+    chown -R nginx:nginx /usr/share/nginx/html
 EXPOSE 80
-
-# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
+
